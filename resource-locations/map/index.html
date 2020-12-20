@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Hello, map!</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <style>
+    #map {
+      height: 540px;
+    }
+
+
+    /* Small devices (landscape phones, 576px and up) */
+    @media (min-width: 576px) {}
+
+    /* Medium devices (tablets, 768px and up) */
+    @media (min-width: 768px) {
+
+      aside {
+        height: 540px;
+      }
+    }
+
+    /* Large devices (desktops, 992px and up) */
+    @media (min-width: 992px) {}
+
+    /* Extra large devices (large desktops, 1200px and up) */
+    @media (min-width: 1200px) {}
+  </style>
+</head>
+
+<body class="bg-dark">
+
+  <div class="container-fluid">
+    <header class="row text-white py-3">
+      <div class="col mx-2">
+        <h1 class="">Gold and Silver in the United States</h1>
+      </div>
+    </header>
+
+    <section class="row">
+      <div class="col-12 col-md-8 col-lg-9 px-0">
+        <div id="map"></div>
+      </div>
+      <aside id="about" class="col-12 col-md-4 col-lg-3 text-white py-2 bg-secondary overflow-auto">
+        <section>
+          <h2>American Gold and Silver</h2>
+          <p>This map identifies places in the United States where gold or silver is processed. The shapefiles have been adapted from freely-available
+            data on the Internet to produce JSONs on the host computer, which are then translated into this map through HTML.</p>
+            <p>Yellow indicates gold, while gray indicates silver. Because these two minerals were identified and handled separately,
+              they are accessed through their own individual files. This leaves open the possibility that the map can be clarified
+              by adding the ability to toggle or fade different values. The process used to generate these files can also easily
+              be reapplied to different kinds of resources from the same database.
+            </p>
+        </section>
+      </aside>
+    </section>
+    <footer class="row text-white py-3">
+      <div class="col mx-2">
+        <ul class="list-unstyled">
+          <li>Authored by Daniel Helton</li>
+          <li>12-20-2020</li>
+          <li>Data from the <a href="https://mrdata.usgs.gov/mrds/">Mineral Resources Data System</a></li>
+        </ul>
+      </div>
+    </footer>
+  </div>
+
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+    </script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+    </script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="https://d3js.org/d3.v5.js"></script>
+  <script src="https://unpkg.com/topojson@3"></script>
+  <script>
+    const options = {
+      center: [39.3, -98.6],
+      zoom: 4.5,
+      zoomSnap: .1
+    }
+    const map = L.map('map', options);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    var stateLayer = $.getJSON("data/us_states.json", function (data) {
+
+      var dataLayer = L.geoJson(data, {
+        style: function (feature) {
+          return {
+            color: 'blue',
+            weight: 1,
+            fillOpacity: 1,
+            fillColor: 'black'
+          };
+        }
+      }).addTo(map);
+
+    });
+
+    var goldLayer = $.getJSON("data/us_gold.json", function (data) {
+
+      var goldStyle = {
+        radius: 3,
+        fillColor: "#FFD700",
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      };
+
+      var dataLayer = L.geoJson(data, {
+        pointToLayer: function (feature, latlng) {
+          return L.circleMarker(latlng, goldStyle);
+        }
+      }).addTo(map);
+
+    });
+
+    var silverLayer = $.getJSON("data/us_silver.json", function (data) {
+
+      var silverStyle = {
+        radius: 3,
+        fillColor: "gray",
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      };
+
+      var dataLayer = L.geoJson(data, {
+        pointToLayer: function (feature, latlng) {
+          return L.circleMarker(latlng, silverStyle);
+        }
+      }).addTo(map);
+
+    });
+
+
+
+  </script>
+</body>
+
+</html>
